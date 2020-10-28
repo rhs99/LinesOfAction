@@ -38,6 +38,5 @@ class Play:
 
             game.update()
         
-        pygame.quit()
 
     
