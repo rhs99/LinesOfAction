@@ -14,16 +14,22 @@ cols = 6
 square_size = WIDTH // cols
 
 win = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption('Lines of Action')
 
  
 
 def set_board_size(selected, value):
-    if value == 2:
-        global rows 
+
+    global rows, cols, square_size
+
+    if value == 1:
+        rows = 6
+        cols = 6
+        square_size = WIDTH // cols
+
+    elif value == 2:
         rows = 8
-        global cols 
         cols = 8
-        global square_size
         square_size = WIDTH // cols
   
 
@@ -45,7 +51,6 @@ menu = pygame_menu.Menu(height=600,
                         theme=pygame_menu.themes.THEME_BLUE,
                         title='Welcome')
 
-#menu.add_text_input('Name: ', default='John Doe')
 menu.add_selector('Board Size: ', [('6x6', 1), ('8x8', 2)], onchange=set_board_size)
 menu.add_selector('Playing mode: ', [('Human vs Human', 1), ('Human vs AI', 2)], onchange=set_playing_mode)
 menu.add_button('Play', start_the_game)
