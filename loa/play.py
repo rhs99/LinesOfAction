@@ -25,6 +25,7 @@ class Play:
         game = Game(self.win, self.rows, self.cols, self.square_size)
 
         while run:
+
             clock.tick(self.FPS)
 
             for event in pygame.event.get():
@@ -37,6 +38,13 @@ class Play:
                     game.select(row, col)
 
             game.update()
+
+            result  = game.winner()
+            if result != None:
+                run = False
+                print(result)
+
+           
         
 
     

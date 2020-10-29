@@ -12,7 +12,7 @@ class Game:
     
     def update(self):
         self.board.draw(self.win, self.turn)
-        self.draw_valid_moves(self.valid_moves)
+        self.draw_valid_moves(self.valid_moves) 
         pygame.display.update()
 
     def _init(self):
@@ -22,7 +22,7 @@ class Game:
         self.valid_moves = {}
 
     def winner(self):
-        return self.board.winner()
+        return self.board.winner(self.turn)
 
     def reset(self):
         self._init()

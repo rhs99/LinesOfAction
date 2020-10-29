@@ -1,4 +1,5 @@
 import pygame
+import queue
 from .constants import BLACK, RED, WHITE, BLUE, YELLOW1, YELLOW2
 from .piece import Piece
 
@@ -10,10 +11,11 @@ class Board:
         self.rows = rows
         self.cols = cols
         self.square_size = square_size
+        self.fx = [1, -1, 0, 0, -1, 1, -1 ,1]
+        self.fy = [0, 0, 1, -1, 1, 1, -1, -1]      
         self.create_board()
-
         
-    
+
     def draw_squares(self, win):
         win.fill(YELLOW2)
         for row in range(self.rows):
@@ -59,15 +61,64 @@ class Board:
                 self.black_left -= 1
             else:
                 self.white_left -= 1
-    
-    def winner(self):
-        if self.black_left <= 0:
-            return WHITE
-        elif self.white_left <= 0:
-            return BLACK
-        return None 
 
-        
+    def get_colored_piece(self, color):
+        piece = 0
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if self.board[row][col] != 0 and self.board[row][col].color == color:
+                    piece = self.board[row][col]
+                    break
+            if piece != 0:
+                break
+        return piece
+
+    def is_connected(self, piece):
+        if piece == 0:
+            return False
+
+        q = queue.Queue()
+        q.put(piece)
+        vis = [[0 for i in range(self.cols)] for j in range(self.rows)]
+        vis[piece.row][piece.col] = 1
+        piece_cnt = 0
+        while not q.empty():
+           
+            u = q.get()
+            piece_cnt += 1
+            for k in range(8):
+                tx = u.row + self.fx[k]
+                ty = u.col + self.fy[k]
+                if 0<=tx<self.rows and 0<=ty<self.cols and vis[tx][ty] == 0 and self.board[tx][ty] != 0 and self.board[tx][ty].color == piece.color:
+                    vis[tx][ty] = 1
+                    q.put(self.board[tx][ty])
+
+
+        if piece.color == BLACK:
+            return piece_cnt == self.black_left
+        else:
+            return piece_cnt == self.white_left
+
+
+
+    def winner(self, turn):
+        black_piece = self.get_colored_piece(BLACK)
+        white_piece = self.get_colored_piece(WHITE)
+        bl_con = self.is_connected(black_piece)
+        wh_con = self.is_connected(white_piece)
+      
+        if bl_con and wh_con:
+            if turn == BLACK:
+                return WHITE
+            else:
+                return BLACK
+        elif bl_con:
+            return BLACK
+        elif wh_con:
+            return WHITE
+        else:
+            return None
+    
     
     def get_valid_moves(self, piece):
         moves = {}
