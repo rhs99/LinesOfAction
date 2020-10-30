@@ -1,6 +1,9 @@
 import pygame
 
-from .constants import WIDTH, HEIGHT
+pygame.init() 
+
+
+from .constants import WIDTH, HEIGHT, BLACK, WHITE, RED, BLUE, GREEN
 from .game import Game
 
  
@@ -12,6 +15,8 @@ class Play:
         self.rows = rows
         self.cols = cols
         self.square_size = square_size
+        self.font = pygame.font.Font('freesansbold.ttf', 32) 
+  
 
     def get_row_col_from_mouse(self, pos):
         x, y = pos
@@ -19,10 +24,14 @@ class Play:
         col = x // self.square_size
         return row, col
 
+   
+            
+
     def start_playing(self):
         run = True
         clock = pygame.time.Clock()
         game = Game(self.win, self.rows, self.cols, self.square_size)
+        finished = False
 
         while run:
 
@@ -37,12 +46,23 @@ class Play:
                     row, col = self.get_row_col_from_mouse(pos)
                     game.select(row, col)
 
-            game.update()
+            if not finished:
+                game.update()
+            else:
+                pygame.display.update()
 
             result  = game.winner()
             if result != None:
-                run = False
-                print(result)
+                if result == BLACK:
+                    text = self.font.render('BLACK WINS!', True, GREEN, )
+                else:
+                    text = self.font.render('WHITE WINS!', True, GREEN, )
+
+                textRect = text.get_rect()  
+                textRect.center = (WIDTH// 2, HEIGHT // 2) 
+                self.win.fill(BLACK)
+                self.win.blit(text, textRect) 
+                finished = True
 
            
         
