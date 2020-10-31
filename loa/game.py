@@ -3,11 +3,12 @@ from .constants import BLACK, WHITE, BLUE
 from .board import Board
 
 class Game:
-    def __init__(self, win, rows, cols, square_size):
+    def __init__(self, win, rows, cols, square_size, with_ai):
         self.win = win
         self.rows = rows
         self.cols = cols
         self.square_size = square_size
+        self.with_ai = with_ai
         self._init()
     
     def update(self):
@@ -29,9 +30,10 @@ class Game:
 
     def select(self, row, col):
         if self.selected:
-            result = self._move(row, col)
-            if not result:
-                self.selected = None
+            self._move(row, col)
+            self.selected = None
+            self.valid_moves = {}
+            return
         
         piece = self.board.get_piece(row, col)
         if piece != 0 and piece.color == self.turn:
@@ -47,14 +49,25 @@ class Game:
             if piece == 0:
                 self.board.move(self.selected, row, col)
                 self.change_turn()
-                return True
             elif piece.color != self.selected.color:
                 self.board.remove(piece)
                 self.board.move(self.selected, row, col)
                 self.change_turn()
-                return True
 
-        return False
+
+    def _ai_move(self, piece, row, col):
+        if piece == 0:
+            self.change_turn()
+            return
+        temp = self.board.get_piece(row, col)
+        if temp == 0:
+            self.board.move(piece, row, col)
+            self.change_turn()
+        elif piece.color != temp.color:
+            self.board.remove(temp)
+            self.board.move(piece, row, col)
+            self.change_turn()
+
 
 
     def draw_valid_moves(self, moves):
@@ -63,8 +76,34 @@ class Game:
             pygame.draw.circle(self.win, BLUE, (col * self.square_size + self.square_size//2, row * self.square_size + self.square_size//2), 15)
 
     def change_turn(self):
+
         self.valid_moves = {}
+
         if self.turn == BLACK:
             self.turn = WHITE
+            if self.with_ai:
+                self.get_move_from_ai()
         else:
             self.turn = BLACK
+
+
+    def get_move_from_ai(self):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                piece = self.board.get_piece(row, col)
+                if piece == 0:
+                    print(0, flush=True) 
+                elif piece.color == BLACK:
+                    print(1, flush=True)
+                else:
+                    print(2, flush=True)
+
+        sx = int(input())
+        sy = int(input())
+        tx = int(input())
+        ty = int(input())
+        piece = self.board.get_piece(sx, sy)
+        self._ai_move(piece, tx, ty)
+
+        
+        

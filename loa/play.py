@@ -8,13 +8,14 @@ from .game import Game
 
  
 class Play:
-    def __init__(self, win, rows, cols, square_size):
+    def __init__(self, win, rows, cols, square_size, with_ai):
         self.win = win
         self.square_size = square_size
         self.FPS = 60
         self.rows = rows
         self.cols = cols
         self.square_size = square_size
+        self.with_ai = with_ai
         self.font = pygame.font.Font('freesansbold.ttf', 32) 
   
 
@@ -30,7 +31,7 @@ class Play:
     def start_playing(self):
         run = True
         clock = pygame.time.Clock()
-        game = Game(self.win, self.rows, self.cols, self.square_size)
+        game = Game(self.win, self.rows, self.cols, self.square_size, self.with_ai)
         finished = False
 
         while run:

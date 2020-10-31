@@ -12,6 +12,7 @@ from loa.play import Play
 rows = 6
 cols = 6
 square_size = WIDTH // cols
+with_ai = False
 
 win = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('Lines of Action')
@@ -34,14 +35,15 @@ def set_board_size(selected, value):
   
 
 def set_playing_mode(selected, value):
-    """
-    Set the difficulty of the game.
-    """
-    print('Set difficulty to {} ({})'.format(selected[0], value))
+    global with_ai
+    if value == 1:
+        with_ai = False
+    else:
+        with_ai = True
 
 
 def start_the_game():
-    play = Play(win, rows, cols, square_size)
+    play = Play(win, rows, cols, square_size, with_ai)
     play.start_playing()
 
 

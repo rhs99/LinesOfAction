@@ -1,4 +1,5 @@
 import pygame
+import sys
 import queue
 from .constants import BLACK, RED, WHITE, BLUE, YELLOW1, YELLOW2
 from .piece import Piece
@@ -45,7 +46,10 @@ class Board:
             self.board[row][0] = Piece(row, 0, WHITE, self.square_size)
             self.board[row][self.cols-1] = Piece(row, self.cols-1, WHITE, self.square_size)
 
-    
+        print(self.rows, flush=True)
+        print(self.cols, flush=True)
+
+       
     def draw(self, win, turn):
         self.draw_squares(win)
         for row in range(self.rows):
