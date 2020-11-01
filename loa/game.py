@@ -47,18 +47,22 @@ class Game:
         piece = self.board.get_piece(row, col)
         if self.selected and (row, col) in self.valid_moves:
             if piece == 0:
+                tx = self.selected.row
+                ty = self.selected.col
                 self.board.move(self.selected, row, col)
+                print(tx, ty, row, col, flush=True) 
                 self.change_turn()
             elif piece.color != self.selected.color:
                 self.board.remove(piece)
+                tx = self.selected.row
+                ty = self.selected.col
                 self.board.move(self.selected, row, col)
+                print(tx, ty, row, col, flush=True) 
                 self.change_turn()
+               
 
 
     def _ai_move(self, piece, row, col):
-        if piece == 0:
-            self.change_turn()
-            return
         temp = self.board.get_piece(row, col)
         if temp == 0:
             self.board.move(piece, row, col)
@@ -88,15 +92,15 @@ class Game:
 
 
     def get_move_from_ai(self):
-        for row in range(self.rows):
-            for col in range(self.cols):
-                piece = self.board.get_piece(row, col)
-                if piece == 0:
-                    print(0, flush=True) 
-                elif piece.color == BLACK:
-                    print(1, flush=True)
-                else:
-                    print(2, flush=True)
+        # for row in range(self.rows):
+        #     for col in range(self.cols):
+        #         piece = self.board.get_piece(row, col)
+        #         if piece == 0:
+        #             print(0, flush=True) 
+        #         elif piece.color == BLACK:
+        #             print(1, flush=True)
+        #         else:
+        #             print(2, flush=True)
 
         sx = int(input())
         sy = int(input())
