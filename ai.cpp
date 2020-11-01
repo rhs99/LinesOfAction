@@ -10,7 +10,24 @@ int fy[] = {0, 0, 1, -1, 1, 1, -1, -1};
 int dx[] = {1, 0, -1, -1};
 int dy[] = {0, 1, -1, 1}; 
 
-
+int pos_val8[8][8] = {
+    {-80,-25,-20,-20,-20,-20,-25,-80},
+    {-25,10,10,10,10,10,10,-25},
+    {-20,10,25,25,25,25,10,-20},
+    {-20,10,25,50,50,25,10,-20},
+    {-20,10,25,50,50,25,10,-20},
+    {-20,10,25,25,25,25,10,-20},
+    {-25,10,10,10,10,10,10,-25},
+    {-80,-25,-20,-20,-20,-20,-25,-80}
+};
+int pos_val6[6][6] = {
+    {-80,-20,-20,-20,-20,-80},
+    {-20,25,25,25,25,-20},
+    {-20,25,50,50,25,-20},
+    {-20,25,50,50,25,-20},
+    {-20,25,25,25,25,-20},
+    {-80,-20,-20,-20,-20,-80}
+};
 
 struct move_info{
     int sx,sy,tx,ty;
@@ -24,11 +41,7 @@ struct move_info{
     }
 };
 
-
- 
 move_info next_move;
-
-
 
 
 void create_board()
@@ -46,8 +59,7 @@ void create_board()
 }
 
 void resolve_opponents_move(int pp,int qq,int rr,int ss)
-{
-    cerr<<pp<<" "<<qq<<" "<<rr<<" "<<ss<<endl;
+{ 
     state[rr][ss] = state[pp][qq];
     state[pp][qq] = 0;
 }
@@ -101,8 +113,6 @@ int get_piece_cnt(int x,int y,int dir)
 void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
 {
     int cnt = get_piece_cnt(x,y,dir);
-    // if(state[x][y]==2)
-    //     cerr<<x<<" "<<y<<" "<<dir<<" "<<cnt<<endl;
 
     int cur_x = x, cur_y = y;
     int _dx = dx[dir], _dy = dy[dir];
@@ -123,7 +133,6 @@ void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
         }
         if(temp<=0)
         {
-            //cerr<<x<<" "<<y<<" : "<<dir<<" - "<<cnt<<": "<<tx<<" "<<ty<<endl;
             valid_moves.push_back(move_info(x,y,tx,ty));
         }   
     }
@@ -147,7 +156,6 @@ void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
         }
         if(temp<=0)
         {
-           // cerr<<x<<" "<<y<<" : "<<dir<<" - "<<cnt<<": "<<tx<<" "<<ty<<endl;
             valid_moves.push_back(move_info(x,y,tx,ty));
         }   
     }
@@ -170,11 +178,6 @@ void make_valid_moves(int player, vector<move_info>&valid_moves)
             }
         }
     } 
-    // cerr<<player<<endl;
-    // for(auto it:valid_moves)
-    // {
-    //     cerr<<"hi "<<it.sx<<" "<<it.sy<<" "<<it.tx<<" "<<it.ty<<endl;
-    // } 
 }
 
 int get_connectedness()
@@ -332,11 +335,92 @@ int get_area()
     return area_b-area;
 }
 
+
+
+int get_mutual_dis()
+{
+    vector<pii>w,b;
+    for(int i=0;i<rows;i++)
+    {
+        for(int j=0;j<cols;j++)
+        {
+            if(state[i][j] == 1)
+                b.push_back({i,j});
+            else if(state[i][j] == 2)
+                w.push_back({i,j});
+        }
+    }
+
+    int dw = 0,db = 0;
+
+    for(int i=0;i<w.size();i++)
+    {
+        for(int j=i+1;j<w.size();j++)
+        {
+            dw += (abs(w[i].first-w[j].first)+abs(w[i].second-w[j].second));
+        }
+    }
+    for(int i=0;i<b.size();i++)
+    {
+        for(int j=i+1;j<b.size();j++)
+        {
+            db += (abs(b[i].first-b[j].first)+abs(b[i].second-b[j].second));
+        }
+    }
+
+    return db-dw;
+}
+
+
+int get_position_val()
+{
+    int w = 0,b = 0;
+
+    if(rows == 6)
+    {
+        for(int i=0;i<rows;i++)
+        {
+            for(int j=0;j<cols;j++)
+            {
+                if(state[i][j] == 1)
+                {
+                    b += pos_val6[i][j];
+                }
+                else if(state[i][j] == 2)
+                {
+                    w += pos_val6[i][j];
+                }
+                
+            }
+        }
+    }
+    else
+    {
+        for(int i=0;i<rows;i++)
+        {
+            for(int j=0;j<cols;j++)
+            {
+                if(state[i][j] == 1)
+                {
+                    b += pos_val8[i][j];
+                }
+                else if(state[i][j] == 2)
+                {
+                    w += pos_val8[i][j];
+                }
+                
+            }
+        }
+    }
+
+    return w-b;
+    
+}
  
 
 int get_heuristic_value()
 {
-    return get_density() + get_quad() + get_connectedness() + get_area();
+    return get_density() + get_quad() + get_connectedness() + get_area() + get_mutual_dis() + get_position_val();
 }
 
 
@@ -344,7 +428,7 @@ int get_heuristic_value()
 
 int minimax(int lvl,int alpha,int beta,bool is_max)
 {
-    if(lvl>4)
+    if(lvl>5)
     {
         return get_heuristic_value();
     }
@@ -413,16 +497,7 @@ void print_next_move()
 
     state[next_move.tx][next_move.ty] = state[next_move.sx][next_move.sy];
     state[next_move.sx][next_move.sy] = 0;
-
-    // for(int i=0;i<rows;i++)
-    // {
-    //     for(int j=0;j<cols;j++)
-    //     {
-    //         cerr<<state[i][j]<<" ";
-    //     }
-    //     cerr<<endl;
-    // }
-    // cerr<<endl;
+ 
     
     cout<<next_move.sx<<endl;
     cout<<next_move.sy<<endl;
