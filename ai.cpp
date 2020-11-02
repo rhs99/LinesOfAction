@@ -453,6 +453,8 @@ int is_connected(pii src,int player)
 
 int winning_state()
 {
+    memset(vis,0,sizeof(vis));
+    
     pii wh, bl;
     int cb = 0,cw = 0;
     for(int i=0;i<rows;i++)
@@ -462,12 +464,12 @@ int winning_state()
             if(state[i][j] == 1)
             {
                 cb++;
-                bl = {i,j};
+                bl = pii(i,j);
             }
             else if(state[i][j] == 2)
             {
                 cw++;
-                wh = {i,j};
+                wh = pii(i,j);
             }
         }
     }
