@@ -4,7 +4,7 @@ using namespace std;
 #define MX 10
 
 int rows,cols;
-int state[MX][MX];
+int state[MX][MX],vis[MX][MX];
 int fx[] = {1, -1, 0, 0, -1, 1, -1 ,1};
 int fy[] = {0, 0, 1, -1, 1, 1, -1, -1};   
 int dx[] = {1, 0, -1, -1};
@@ -125,7 +125,7 @@ void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
         {
             cur_x += _dx;
             cur_y += _dy;
-            if(state[cur_x][cur_y] != state[x][y])
+            if(state[cur_x][cur_y] && state[cur_x][cur_y] != state[x][y])
             {
                 break;
             }
@@ -134,8 +134,11 @@ void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
         if(temp<=0)
         {
             valid_moves.push_back(move_info(x,y,tx,ty));
-        }   
+        }
+         
+         
     }
+     
 
     cur_x = x, cur_y = y;
     _dx = -dx[dir], _dy = -dy[dir];
@@ -148,7 +151,7 @@ void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
         {
             cur_x += _dx;
             cur_y += _dy;
-            if(state[cur_x][cur_y] != state[x][y])
+            if(state[cur_x][cur_y] && state[cur_x][cur_y] != state[x][y])
             {
                 break;
             }
@@ -156,9 +159,11 @@ void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
         }
         if(temp<=0)
         {
-            valid_moves.push_back(move_info(x,y,tx,ty));
+            valid_moves.push_back(move_info(x,y,tx,ty));      
         }   
     }
+    
+    
 
 }
 
@@ -416,11 +421,77 @@ int get_position_val()
     return w-b;
     
 }
+
+int is_connected(pii src,int player)
+{
+    int cnt = 0;
+    queue<pii>q;
+    q.push(src);
+    vis[src.first][src.second] = 1;
+    while(!q.empty())
+    {
+        pii u = q.front();
+        q.pop();
+        cnt++;
+
+        for(int i=0;i<8;i++)
+        {
+            int tx = u.first + fx[i];
+            int ty = u.second + fy[i];
+
+            if(tx>=0 && tx<rows && ty>=0 && ty<cols && vis[tx][ty] == 0 && state[tx][ty] == player)
+            {
+                vis[tx][ty] = 1;
+                q.push({tx,ty});
+            }
+        }
+    }
+
+    return cnt;
+
+}
+
+int winning_state()
+{
+    pii wh, bl;
+    int cb = 0,cw = 0;
+    for(int i=0;i<rows;i++)
+    {
+        for(int j=0;j<cols;j++)
+        {
+            if(state[i][j] == 1)
+            {
+                cb++;
+                bl = {i,j};
+            }
+            else if(state[i][j] == 2)
+            {
+                cw++;
+                wh = {i,j};
+            }
+        }
+    }
+
+    bool wh_win = is_connected(wh,2) == cw;
+    bool bl_win = is_connected(bl,1) == cb;
+ 
+    if(bl_win)
+        return -1000;
+    else if(wh_win)
+        return 1000;
+    else
+        return 0;
+
+    
+
+
+}
  
 
 int get_heuristic_value()
 {
-    return get_density() + get_quad() + get_connectedness() + get_area() + get_mutual_dis() + get_position_val();
+    int ret = winning_state() + get_density() + get_area() + get_connectedness() + get_quad() + get_mutual_dis() + get_position_val();
+    return ret;
 }
 
 
@@ -438,9 +509,12 @@ int minimax(int lvl,int alpha,int beta,bool is_max)
         int max_eval = INT_MIN;
         vector<move_info>valid_moves; 
         make_valid_moves(2,valid_moves);
+ 
 
         for(auto it:valid_moves)
         {
+
+            
             int prev = state[it.tx][it.ty];
             state[it.tx][it.ty] = state[it.sx][it.sy];
             state[it.sx][it.sy] = 0;
@@ -497,6 +571,16 @@ void print_next_move()
 
     state[next_move.tx][next_move.ty] = state[next_move.sx][next_move.sy];
     state[next_move.sx][next_move.sy] = 0;
+
+    // for(int i=0;i<rows;i++)
+    // {
+    //     for(int j=0;j<cols;j++)
+    //     {
+    //         cerr<<state[i][j]<<" ";
+    //     }
+    //     cerr<<endl;
+    // }
+    // cerr<<endl;
  
     
     cout<<next_move.sx<<endl;
