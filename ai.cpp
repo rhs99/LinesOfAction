@@ -572,15 +572,15 @@ void print_next_move()
     state[next_move.tx][next_move.ty] = state[next_move.sx][next_move.sy];
     state[next_move.sx][next_move.sy] = 0;
 
-    // for(int i=0;i<rows;i++)
-    // {
-    //     for(int j=0;j<cols;j++)
-    //     {
-    //         cerr<<state[i][j]<<" ";
-    //     }
-    //     cerr<<endl;
-    // }
-    // cerr<<endl;
+    for(int i=0;i<rows;i++)
+    {
+        for(int j=0;j<cols;j++)
+        {
+            cerr<<state[i][j]<<" ";
+        }
+        cerr<<endl;
+    }
+    cerr<<endl;
  
     
     cout<<next_move.sx<<endl;
