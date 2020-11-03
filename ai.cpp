@@ -3,6 +3,9 @@ using namespace std;
 #define pii pair<int,int>
 #define MX 10
 
+ofstream ai_log;
+
+
 int rows,cols;
 int state[MX][MX],vis[MX][MX];
 int fx[] = {1, -1, 0, 0, -1, 1, -1 ,1};
@@ -186,7 +189,7 @@ void make_valid_moves(int player, vector<move_info>&valid_moves)
 }
 
 int get_connectedness()
-{
+{ 
     int ret_w = 0,tx,ty,cnt_w = 0,ret_b = 0,cnt_b = 0;
     for(int i=0;i<rows;i++)
     {
@@ -222,6 +225,8 @@ int get_connectedness()
             }
         }
     }
+    assert(cnt_b>0&&cnt_w>0);
+    
     return ret_w/cnt_w - ret_b/cnt_b;
 
 }
@@ -265,6 +270,7 @@ int get_quad()
 
 int get_density()
 {
+    
     int x_br = 0,y_br = 0,cnt = 0,bx_br = 0,by_br = 0,b_cnt = 0;
     for(int i=0;i<rows;i++)
     {
@@ -284,6 +290,8 @@ int get_density()
             }
         }
     }
+
+    assert(cnt>0 && b_cnt>0);
 
     x_br /= cnt;
     y_br /= cnt;
@@ -306,6 +314,7 @@ int get_density()
             }
         }
     }
+   
 
     return ret_b-ret;
 
@@ -313,6 +322,7 @@ int get_density()
 
 int get_area()
 {
+    
     int p = INT_MAX,q = INT_MAX,r = INT_MIN,s = INT_MIN,bp = INT_MAX,bq = INT_MAX,br = INT_MIN,bs = INT_MIN;
     for(int i=0;i<rows;i++)
     {
@@ -337,6 +347,7 @@ int get_area()
 
     int area = abs(p-r)*abs(q-s);
     int area_b = abs(bp-br)*abs(bq-bs);
+    
     return area_b-area;
 }
 
@@ -379,6 +390,7 @@ int get_mutual_dis()
 
 int get_position_val()
 {
+     
     int w = 0,b = 0;
 
     if(rows == 6)
@@ -417,6 +429,8 @@ int get_position_val()
             }
         }
     }
+
+    
 
     return w-b;
     
@@ -478,9 +492,9 @@ int winning_state()
     bool bl_win = is_connected(bl,1) == cb;
  
     if(bl_win)
-        return -1000;
+        return -1500;
     else if(wh_win)
-        return 1000;
+        return 1500;
     else
         return 0;
 
@@ -492,7 +506,7 @@ int winning_state()
 
 int get_heuristic_value()
 {
-    int ret = winning_state() + get_density() + get_area() + get_connectedness() + get_quad() + get_mutual_dis() + get_position_val();
+    int ret = get_density() + get_area() + get_connectedness() + get_position_val();
     return ret;
 }
 
@@ -501,6 +515,11 @@ int get_heuristic_value()
 
 int minimax(int lvl,int alpha,int beta,bool is_max)
 {
+    int ret = winning_state()/lvl;
+
+    if(ret != 0)
+        return ret;
+
     if(lvl>5)
     {
         return get_heuristic_value();
@@ -515,8 +534,6 @@ int minimax(int lvl,int alpha,int beta,bool is_max)
 
         for(auto it:valid_moves)
         {
-
-            
             int prev = state[it.tx][it.ty];
             state[it.tx][it.ty] = state[it.sx][it.sy];
             state[it.sx][it.sy] = 0;
@@ -569,20 +586,26 @@ int minimax(int lvl,int alpha,int beta,bool is_max)
 
 void print_next_move()
 {
+    
     minimax(1,INT_MIN,INT_MAX,true);
+    
 
     state[next_move.tx][next_move.ty] = state[next_move.sx][next_move.sy];
     state[next_move.sx][next_move.sy] = 0;
 
-    for(int i=0;i<rows;i++)
-    {
-        for(int j=0;j<cols;j++)
-        {
-            cerr<<state[i][j]<<" ";
-        }
-        cerr<<endl;
-    }
-    cerr<<endl;
+    //ai_log<<next_move.sx<<" "<<next_move.sy<<" "<<next_move.tx<<" "<<next_move.ty<<endl;
+
+
+
+    // for(int i=0;i<rows;i++)
+    // {
+    //     for(int j=0;j<cols;j++)
+    //     {
+    //         cerr<<state[i][j]<<" ";
+    //     }
+    //     cerr<<endl;
+    // }
+    // cerr<<endl;
  
     
     cout<<next_move.sx<<endl;
@@ -597,6 +620,8 @@ void print_next_move()
 
 int main()
 {
+    ai_log.open("log.txt");
+
     string s;
     getline(cin,s);
     getline(cin,s);
@@ -611,6 +636,7 @@ int main()
     {
         cin>>pp>>qq>>rr>>ss;
         resolve_opponents_move(pp,qq,rr,ss);
+        //ai_log<<pp<<" "<<qq<<" "<<rr<<" "<<ss<<endl;
         print_next_move();
          
     }
