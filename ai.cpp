@@ -12,6 +12,7 @@ int fx[] = {1, -1, 0, 0, -1, 1, -1 ,1};
 int fy[] = {0, 0, 1, -1, 1, 1, -1, -1};   
 int dx[] = {1, 0, -1, -1};
 int dy[] = {0, 1, -1, 1}; 
+int depth;
 
 int pos_val8[8][8] = {
     {-80,-25,-20,-20,-20,-20,-25,-80},
@@ -520,7 +521,7 @@ int minimax(int lvl,int alpha,int beta,bool is_max)
     if(ret != 0)
         return ret;
 
-    if(lvl>5)
+    if(lvl>depth)
     {
         return get_heuristic_value();
     }
@@ -586,8 +587,9 @@ int minimax(int lvl,int alpha,int beta,bool is_max)
 
 void print_next_move()
 {
-    
+    clock_t st = clock();
     minimax(1,INT_MIN,INT_MAX,true);
+    ai_log<<1.0*(clock()-st)/CLOCKS_PER_SEC<<endl;
     
 
     state[next_move.tx][next_move.ty] = state[next_move.sx][next_move.sy];
@@ -627,6 +629,12 @@ int main()
     getline(cin,s);
 
     cin>>rows>>cols;
+
+    if(rows == 6)
+        depth = 5;
+    else
+        depth = 4;
+    
 
     create_board();
 
