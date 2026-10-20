@@ -1,4 +1,21 @@
-*.pyc
-*.json
-ai
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Compiled AI engine
+ai/loa_ai
+ai/*.o
+ai/*.dSYM/
+
+# Runtime artifacts
 log.txt
+pipe
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

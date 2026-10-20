@@ -1,17 +1,25 @@
-#include<bits/stdc++.h>
+// Lines of Action minimax engine. Speaks a tiny line protocol over stdin/stdout;
+// see loa/ai_client.py for the Python side.
+#include <algorithm>
+#include <cassert>
+#include <climits>
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
+#include <iostream>
+#include <queue>
+#include <utility>
+#include <vector>
 using namespace std;
 #define pii pair<int,int>
 #define MX 10
 
-ofstream ai_log;
-
-
 int rows,cols;
 int state[MX][MX],vis[MX][MX];
 int fx[] = {1, -1, 0, 0, -1, 1, -1 ,1};
-int fy[] = {0, 0, 1, -1, 1, 1, -1, -1};   
+int fy[] = {0, 0, 1, -1, 1, 1, -1, -1};
 int dx[] = {1, 0, -1, -1};
-int dy[] = {0, 1, -1, 1}; 
+int dy[] = {0, 1, -1, 1};
 int depth;
 
 int pos_val8[8][8] = {
@@ -35,7 +43,7 @@ int pos_val6[6][6] = {
 
 struct move_info{
     int sx,sy,tx,ty;
-    move_info(){}
+    move_info():sx(-1),sy(-1),tx(-1),ty(-1){}
     move_info(int sx,int sy,int tx,int ty)
     {
         this->sx = sx;
@@ -53,17 +61,17 @@ void create_board()
     for(int i=1;i<cols-1;i++)
     {
         state[0][i] = 1;
-        state[rows-1][i] = 1; 
+        state[rows-1][i] = 1;
     }
     for(int i=1;i<rows-1;i++)
     {
         state[i][0] = 2;
-        state[i][cols-1] = 2; 
+        state[i][cols-1] = 2;
     }
 }
 
 void resolve_opponents_move(int pp,int qq,int rr,int ss)
-{ 
+{
     state[rr][ss] = state[pp][qq];
     state[pp][qq] = 0;
 }
@@ -88,7 +96,7 @@ int get_piece_cnt(int x,int y,int dir)
         else
         {
             break;
-        }  
+        }
     }
 
     cur_x = x, cur_y = y;
@@ -107,7 +115,7 @@ int get_piece_cnt(int x,int y,int dir)
         else
         {
             break;
-        }  
+        }
     }
 
     return cnt;
@@ -121,7 +129,7 @@ void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
     int cur_x = x, cur_y = y;
     int _dx = dx[dir], _dy = dy[dir];
     int tx = x + (_dx*cnt), ty = y + (_dy*cnt);
-    
+
     if(tx>=0 && tx<rows && ty>=0 && ty<cols && state[tx][ty] != state[x][y])
     {
         int temp = cnt - 1;
@@ -133,21 +141,21 @@ void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
             {
                 break;
             }
-            temp--;   
+            temp--;
         }
         if(temp<=0)
         {
             valid_moves.push_back(move_info(x,y,tx,ty));
         }
-         
-         
+
+
     }
-     
+
 
     cur_x = x, cur_y = y;
     _dx = -dx[dir], _dy = -dy[dir];
     tx = x + (_dx*cnt), ty = y + (_dy*cnt);
-    
+
     if(tx>=0 && tx<rows && ty>=0 && ty<cols && state[tx][ty] != state[x][y])
     {
         int temp = cnt - 1;
@@ -159,15 +167,14 @@ void get_valid_moves(int x,int y,int dir,vector<move_info>&valid_moves)
             {
                 break;
             }
-            temp--;   
+            temp--;
         }
         if(temp<=0)
         {
-            valid_moves.push_back(move_info(x,y,tx,ty));      
-        }   
+            valid_moves.push_back(move_info(x,y,tx,ty));
+        }
     }
-    
-    
+
 
 }
 
@@ -186,11 +193,11 @@ void make_valid_moves(int player, vector<move_info>&valid_moves)
                 }
             }
         }
-    } 
+    }
 }
 
 int get_connectedness()
-{ 
+{
     int ret_w = 0,tx,ty,cnt_w = 0,ret_b = 0,cnt_b = 0;
     for(int i=0;i<rows;i++)
     {
@@ -207,7 +214,7 @@ int get_connectedness()
                     {
                         ret_w++;
                     }
-    
+
                 }
             }
             else if(state[i][j] == 1)
@@ -221,13 +228,13 @@ int get_connectedness()
                     {
                         ret_b++;
                     }
-    
+
                 }
             }
         }
     }
     assert(cnt_b>0&&cnt_w>0);
-    
+
     return ret_w/cnt_w - ret_b/cnt_b;
 
 }
@@ -252,7 +259,7 @@ int quad_val(int r,int c)
         return -1;
     else
         return 0;
-    
+
 
 }
 
@@ -271,7 +278,7 @@ int get_quad()
 
 int get_density()
 {
-    
+
     int x_br = 0,y_br = 0,cnt = 0,bx_br = 0,by_br = 0,b_cnt = 0;
     for(int i=0;i<rows;i++)
     {
@@ -315,7 +322,7 @@ int get_density()
             }
         }
     }
-   
+
 
     return ret_b-ret;
 
@@ -323,7 +330,7 @@ int get_density()
 
 int get_area()
 {
-    
+
     int p = INT_MAX,q = INT_MAX,r = INT_MIN,s = INT_MIN,bp = INT_MAX,bq = INT_MAX,br = INT_MIN,bs = INT_MIN;
     for(int i=0;i<rows;i++)
     {
@@ -348,10 +355,9 @@ int get_area()
 
     int area = abs(p-r)*abs(q-s);
     int area_b = abs(bp-br)*abs(bq-bs);
-    
+
     return area_b-area;
 }
-
 
 
 int get_mutual_dis()
@@ -391,7 +397,7 @@ int get_mutual_dis()
 
 int get_position_val()
 {
-     
+
     int w = 0,b = 0;
 
     if(rows == 6)
@@ -408,7 +414,7 @@ int get_position_val()
                 {
                     w += pos_val6[i][j];
                 }
-                
+
             }
         }
     }
@@ -426,15 +432,14 @@ int get_position_val()
                 {
                     w += pos_val8[i][j];
                 }
-                
+
             }
         }
     }
 
-    
 
     return w-b;
-    
+
 }
 
 int is_connected(pii src,int player)
@@ -469,7 +474,7 @@ int is_connected(pii src,int player)
 int winning_state()
 {
     memset(vis,0,sizeof(vis));
-    
+
     pii wh, bl;
     int cb = 0,cw = 0;
     for(int i=0;i<rows;i++)
@@ -491,7 +496,7 @@ int winning_state()
 
     bool wh_win = is_connected(wh,2) == cw;
     bool bl_win = is_connected(bl,1) == cb;
- 
+
     if(bl_win)
         return -1500;
     else if(wh_win)
@@ -499,19 +504,15 @@ int winning_state()
     else
         return 0;
 
-    
-
 
 }
- 
+
 
 int get_heuristic_value()
 {
     int ret = get_density() + get_area() + get_connectedness() + get_position_val();
     return ret;
 }
-
-
 
 
 int minimax(int lvl,int alpha,int beta,bool is_max)
@@ -529,9 +530,9 @@ int minimax(int lvl,int alpha,int beta,bool is_max)
     if(is_max)
     {
         int max_eval = INT_MIN;
-        vector<move_info>valid_moves; 
+        vector<move_info>valid_moves;
         make_valid_moves(2,valid_moves);
- 
+
 
         for(auto it:valid_moves)
         {
@@ -547,7 +548,7 @@ int minimax(int lvl,int alpha,int beta,bool is_max)
 
             max_eval = max(max_eval,eval);
 
-            if(lvl == 1 && eval>alpha)
+            if(lvl == 1 && (eval>alpha || next_move.sx < 0))
             {
                 next_move = it;
             }
@@ -561,7 +562,7 @@ int minimax(int lvl,int alpha,int beta,bool is_max)
     else
     {
         int min_eval = INT_MAX;
-        vector<move_info>valid_moves; 
+        vector<move_info>valid_moves;
         make_valid_moves(1,valid_moves);
 
         for(auto it:valid_moves)
@@ -580,36 +581,28 @@ int minimax(int lvl,int alpha,int beta,bool is_max)
             if(beta<=alpha)
                 break;
         }
-        return min_eval;  
+        return min_eval;
     }
 }
 
 
 void print_next_move()
 {
+    next_move = move_info();   // reset so a stale move is never replayed
     clock_t st = clock();
     minimax(1,INT_MIN,INT_MAX,true);
-    ai_log<<1.0*(clock()-st)/CLOCKS_PER_SEC<<endl;
-    
+    cerr<<"[ai] thought for "<<1.0*(clock()-st)/CLOCKS_PER_SEC<<"s"<<endl;
+
+    if(next_move.sx < 0)
+    {
+        // game already decided, or no legal move: tell the GUI there is nothing to play
+        cout<<-1<<endl<<-1<<endl<<-1<<endl<<-1<<endl;
+        return;
+    }
 
     state[next_move.tx][next_move.ty] = state[next_move.sx][next_move.sy];
     state[next_move.sx][next_move.sy] = 0;
 
-    //ai_log<<next_move.sx<<" "<<next_move.sy<<" "<<next_move.tx<<" "<<next_move.ty<<endl;
-
-
-
-    // for(int i=0;i<rows;i++)
-    // {
-    //     for(int j=0;j<cols;j++)
-    //     {
-    //         cerr<<state[i][j]<<" ";
-    //     }
-    //     cerr<<endl;
-    // }
-    // cerr<<endl;
- 
-    
     cout<<next_move.sx<<endl;
     cout<<next_move.sy<<endl;
     cout<<next_move.tx<<endl;
@@ -617,39 +610,28 @@ void print_next_move()
 }
 
 
- 
-
-
 int main()
 {
-    ai_log.open("log.txt");
+    ios::sync_with_stdio(false);
 
-    string s;
-    getline(cin,s);
-    getline(cin,s);
+    if(!(cin>>rows>>cols) || rows<2 || cols<2 || rows>MX || cols>MX)
+    {
+        cerr<<"[ai] expected \"<rows> <cols>\" (2.."<<MX<<") on stdin"<<endl;
+        return 1;
+    }
 
-    cin>>rows>>cols;
-
-    if(rows == 6)
-        depth = 5;
-    else
-        depth = 4;
-    
+    depth = (rows == 6) ? 5 : 4;
 
     create_board();
 
     int pp,qq,rr,ss;
 
-    while(true)
+    // Each line from the GUI is the human's move; answer with ours.
+    while(cin>>pp>>qq>>rr>>ss)
     {
-        cin>>pp>>qq>>rr>>ss;
         resolve_opponents_move(pp,qq,rr,ss);
-        //ai_log<<pp<<" "<<qq<<" "<<rr<<" "<<ss<<endl;
         print_next_move();
-         
     }
 
-     
-     
     return 0;
 }

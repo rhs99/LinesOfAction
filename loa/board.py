@@ -1,33 +1,33 @@
-import pygame
-import sys
 import queue
-from .constants import BLACK, RED, WHITE, BLUE, YELLOW1, YELLOW2
+
+import pygame
+
+from .constants import BLACK, WHITE, YELLOW1, YELLOW2
 from .piece import Piece
 
 class Board:
-    def __init__(self, win, rows, cols, square_size):
+    def __init__(self, rows, cols, square_size):
         self.board = []
         self.black_left = self.white_left = (rows-2)*2
-        self.win = win
         self.rows = rows
         self.cols = cols
         self.square_size = square_size
         self.fx = [1, -1, 0, 0, -1, 1, -1 ,1]
-        self.fy = [0, 0, 1, -1, 1, 1, -1, -1]      
+        self.fy = [0, 0, 1, -1, 1, 1, -1, -1]
         self.create_board()
-        
+
 
     def draw_squares(self, win):
         win.fill(YELLOW2)
         for row in range(self.rows):
             for col in range(row % 2, self.cols, 2):
-                pygame.draw.rect(win, YELLOW1, (row*self.square_size, col *self.square_size, self.square_size, self.square_size))
+                pygame.draw.rect(win, YELLOW1, (col*self.square_size, row*self.square_size, self.square_size, self.square_size))
 
     def move(self, piece, row, col):
         self.board[piece.row][piece.col], self.board[row][col] = self.board[row][col], self.board[piece.row][piece.col]
         piece.move(row, col)
 
-         
+
 
     def get_piece(self, row, col):
         return self.board[row][col]
@@ -46,10 +46,8 @@ class Board:
             self.board[row][0] = Piece(row, 0, WHITE, self.square_size)
             self.board[row][self.cols-1] = Piece(row, self.cols-1, WHITE, self.square_size)
 
-        print(self.rows, flush=True)
-        print(self.cols, flush=True)
 
-       
+
     def draw(self, win, turn):
         self.draw_squares(win)
         for row in range(self.rows):
@@ -87,7 +85,7 @@ class Board:
         vis[piece.row][piece.col] = 1
         piece_cnt = 0
         while not q.empty():
-           
+
             u = q.get()
             piece_cnt += 1
             for k in range(8):
@@ -110,7 +108,7 @@ class Board:
         white_piece = self.get_colored_piece(WHITE)
         bl_con = self.is_connected(black_piece)
         wh_con = self.is_connected(white_piece)
-      
+
         if bl_con and wh_con:
             if turn == BLACK:
                 return WHITE
@@ -122,8 +120,8 @@ class Board:
             return WHITE
         else:
             return None
-    
-    
+
+
     def get_valid_moves(self, piece):
         moves = {}
         moves.update(self._traverse_horizontal(piece))
@@ -144,7 +142,7 @@ class Board:
             cur_c += 1
             if self.board[cur_r][cur_c] != 0:
                 piece_cnt += 1
-        
+
         cur_c = piece.col
         while cur_c-1 >= 0:
             cur_c -= 1
@@ -189,13 +187,13 @@ class Board:
             cur_r += 1
             if self.board[cur_r][cur_c] != 0:
                 piece_cnt += 1
-        
+
         cur_r = piece.row
         while cur_r-1 >= 0:
             cur_r -= 1
             if self.board[cur_r][cur_c] != 0:
                 piece_cnt += 1
- 
+
         cur_r = piece.row
         if cur_r + piece_cnt < self.rows:
             temp = piece_cnt-1
@@ -276,7 +274,7 @@ class Board:
             if opp_cnt == 0 and (self.board[piece.row + piece_cnt][piece.col - piece_cnt]==0 or self.board[piece.row + piece_cnt][piece.col - piece_cnt].color != piece.color):
                 moves[(piece.row + piece_cnt, piece.col - piece_cnt)] = self.board[piece.row + piece_cnt][piece.col - piece_cnt]
 
-          
+
         return moves
 
     def _traverse_diagonal2(self, piece):
@@ -332,5 +330,5 @@ class Board:
             if opp_cnt == 0 and (self.board[piece.row + piece_cnt][piece.col + piece_cnt] == 0 or self.board[piece.row + piece_cnt][piece.col + piece_cnt].color != piece.color):
                 moves[(piece.row + piece_cnt, piece.col + piece_cnt)] = self.board[piece.row + piece_cnt][piece.col + piece_cnt]
 
-          
+
         return moves
